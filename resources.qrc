@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/">
+        <file>images/cstar-logo.png</file>
+    </qresource>
+</RCC>

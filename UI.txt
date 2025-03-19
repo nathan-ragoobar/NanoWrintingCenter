@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f5f7fa" rx="10" ry="10"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="800" height="60" fill="#4a5568" rx="10 10 0 0" ry="10 10 0 0"/>
+  <text x="30" y="38" font-family="Arial" font-size="22" fill="white" font-weight="bold">Model Inference UI</text>
+  
+  <!-- Sidebar -->
+  <rect x="0" y="60" width="230" height="540" fill="#e2e8f0"/>
+  
+  <!-- Model Selection Panel -->
+  <rect x="20" y="90" width="190" height="140" fill="white" rx="8" ry="8" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="40" y="120" font-family="Arial" font-size="16" fill="#2d3748" font-weight="bold">Model Selection</text>
+  
+  <!-- Model Dropdown -->
+  <rect x="40" y="140" width="150" height="35" fill="white" rx="5" ry="5" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="55" y="163" font-family="Arial" font-size="14" fill="#4a5568">Select model</text>
+  <path d="M170 155 l10 8 l-10 8" fill="none" stroke="#4a5568" stroke-width="2"/>
+  
+  <!-- Load Model Button -->
+  <rect x="40" y="190" width="150" height="35" fill="#4299e1" rx="5" ry="5"/>
+  <text x="80" y="213" font-family="Arial" font-size="14" fill="white" font-weight="bold">Load Model</text>
+  
+  <!-- Settings Panel -->
+  <rect x="20" y="250" width="190" height="110" fill="white" rx="8" ry="8" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="40" y="280" font-family="Arial" font-size="16" fill="#2d3748" font-weight="bold">Settings</text>
+  
+  <!-- Max Tokens -->
+  <text x="40" y="310" font-family="Arial" font-size="13" fill="#4a5568">Max Tokens</text>
+  <rect x="40" y="320" width="150" height="30" fill="white" rx="5" ry="5" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="55" y="340" font-family="Arial" font-size="13" fill="#4a5568">1024</text>
+  
+  <!-- Main Chat Area -->
+  <rect x="230" y="60" width="570" height="480" fill="white"/>
+  
+  <!-- Chat Messages Area -->
+  <rect x="250" y="80" width="530" height="400" fill="#f8fafc" rx="8" ry="8" stroke="#e2e8f0" stroke-width="1"/>
+  
+  <!-- Example Message - System -->
+  <rect x="270" y="100" width="490" height="35" fill="#e2e8f0" rx="8" ry="8"/>
+  <text x="290" y="123" font-family="Arial" font-size="14" fill="#4a5568">System: Model loaded successfully. How can I assist you?</text>
+  
+  <!-- Example Message - User -->
+  <rect x="400" y="150" width="360" height="35" fill="#bee3f8" rx="8" ry="8"/>
+  <text x="420" y="173" font-family="Arial" font-size="14" fill="#2c5282">User: Can you explain how neural networks work?</text>
+  
+  <!-- Example Message - Assistant -->
+  <rect x="270" y="200" width="490" height="80" fill="#e2e8f0" rx="8" ry="8"/>
+  <text x="290" y="223" font-family="Arial" font-size="14" fill="#4a5568">Assistant: Neural networks are computational models inspired by the</text>
+  <text x="290" y="243" font-family="Arial" font-size="14" fill="#4a5568">human brain. They consist of layers of interconnected nodes or</text>
+  <text x="290" y="263" font-family="Arial" font-size="14" fill="#4a5568">"neurons" that process information and learn patterns from data...</text>
+  
+  <!-- Input Area -->
+  <rect x="250" y="500" width="530" height="80" fill="#f8fafc" rx="8" ry="8" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="270" y="515" width="430" height="50" fill="white" rx="8" ry="8" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="290" y="545" font-family="Arial" font-size="14" fill="#a0aec0">Type your message here...</text>
+  
+  <!-- Send Button -->
+  <circle cx="740" cy="540" r="25" fill="#4299e1"/>
+  <path d="M730 540 l20 0 l-10 -15 z" fill="white"/>
+  
+  <!-- Status Bar -->
+  <rect x="0" y="540" width="800" height="60" fill="#edf2f7"/>
+  <circle cx="270" cy="570" r="8" fill="#48bb78"/>
+  <text x="290" y="575" font-family="Arial" font-size="14" fill="#4a5568">Model Active: GPT-2-medium (665M parameters)</text>
+  <text x="600" y="575" font-family="Arial" font-size="14" fill="#4a5568">Memory: 2.4GB / 8GB</text>
+</svg>
