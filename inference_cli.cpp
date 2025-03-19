@@ -197,6 +197,9 @@ int main(int argc, char** argv) {
                 int next_token = sample_mult(probs, model.config.vocab_size, coin);
                 gen_tokens[t] = next_token;
             }
+
+            //Consider implementing token filtering at the generation stage.
+            //That way we could break after getting the end token "### End"
             
             // Decode the full token sequence
             std::vector<int> result_tokens;
@@ -207,8 +210,26 @@ int main(int argc, char** argv) {
             // Decode just the generated tokens
             std::string result = tokenizer.decode(result_tokens);
             
-            // Output the result
-            std::cout << result << std::endl;
+            // Extract just the corrected sentence between "### Output:" and "### End"
+            size_t start_pos = result.find("### Output:");
+            size_t end_pos = result.find("### End");
+
+            if (start_pos != std::string::npos && end_pos != std::string::npos) {
+                // Extract the content between the markers, accounting for the length of "### Output:"
+                start_pos += std::string("### Output:").length();
+                std::string corrected_text = result.substr(start_pos, end_pos - start_pos);
+                
+                // Trim leading/trailing whitespace
+                corrected_text.erase(0, corrected_text.find_first_not_of(" \t\n\r"));
+                corrected_text.erase(corrected_text.find_last_not_of(" \t\n\r") + 1);
+                
+                // Output just the corrected text
+                std::cout << corrected_text << std::endl;
+            } else {
+                // If markers aren't found, output the full result
+                std::cout << result << std::endl;
+            }
+            
             return 0;
             
         } catch (const std::exception& e) {
