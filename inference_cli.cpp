@@ -145,18 +145,31 @@ int main(int argc, char** argv) {
             nano::GPT2Tokenizer tokenizer("vocab.bpe", "encoder.json");
             
             // Hardcoded tokens for "### Instruction: Correct the grammar in this text ### Input: "
-            std::vector<int> instruction_tokens = {
-                21017, 46486, 25, 22941, 262, 23491, 287, 428, 2420, 220, 21017, 23412, 25, 220
-            };
+            //std::vector<int> instruction_tokens = {
+            //    21017, 46486, 25, 22941, 262, 23491, 287, 428, 2420, 220, 21017, 23412, 25, 220
+            //}; //Zero-shot
             
+            //Hardcoded tokens for "### Instruction: Correct the grammar in this text ### Input: I think they have to get skill on it . 
+            //### Output: I think they have to get skilled in it . ### End### Instruction: Correct the grammar in this text ### Input: "
+            std::vector<int> instruction_tokens = { 21017, 46486, 25, 22941, 262, 23491, 287, 428, 2420, 220, 21017, 23412, 25,
+                314, 892, 484, 423, 284, 651, 5032, 319, 340, 220, 13, 220, 21017, 25235, 25, 314, 892, 484, 423, 284, 651, 14297,
+                287, 340, 220, 13, 220, 21017, 5268, 21017, 46486, 25, 22941, 262, 23491, 287, 428, 2420, 220, 21017, 23412, 25, 220
+            }; //One-shot
+
+
             // Tokenize the input separately
             std::vector<int> text_tokens = tokenizer.encode(input);
             
-            // Combine instruction tokens with input tokens
+            // Hardcoded ending tokens to append  ### Output:
+            std::vector<int> ending_tokens = {220, 21017, 25235, 25};
+            
+            
+            // Combine instruction tokens with input tokens and ending tokens
             std::vector<int> input_tokens;
-            input_tokens.reserve(instruction_tokens.size() + text_tokens.size());
+            input_tokens.reserve(instruction_tokens.size() + text_tokens.size() + ending_tokens.size()); 
             input_tokens.insert(input_tokens.end(), instruction_tokens.begin(), instruction_tokens.end());
             input_tokens.insert(input_tokens.end(), text_tokens.begin(), text_tokens.end());
+            input_tokens.insert(input_tokens.end(), ending_tokens.begin(), ending_tokens.end());
 
             
             // Setup parameters
@@ -210,14 +223,12 @@ int main(int argc, char** argv) {
             // Decode just the generated tokens
             std::string result = tokenizer.decode(result_tokens);
             
-            // Extract just the corrected sentence between "### Output:" and "### End"
-            size_t start_pos = result.find("### Output:");
+            // Extract just the corrected sentence up to "### End"
             size_t end_pos = result.find("### End");
 
-            if (start_pos != std::string::npos && end_pos != std::string::npos) {
-                // Extract the content between the markers, accounting for the length of "### Output:"
-                start_pos += std::string("### Output:").length();
-                std::string corrected_text = result.substr(start_pos, end_pos - start_pos);
+            if (end_pos != std::string::npos) {
+                // Extract all content up to the end marker
+                std::string corrected_text = result.substr(0, end_pos);
                 
                 // Trim leading/trailing whitespace
                 corrected_text.erase(0, corrected_text.find_first_not_of(" \t\n\r"));
@@ -226,7 +237,7 @@ int main(int argc, char** argv) {
                 // Output just the corrected text
                 std::cout << corrected_text << std::endl;
             } else {
-                // If markers aren't found, output the full result
+                // If end marker isn't found, output the full result
                 std::cout << result << std::endl;
             }
             
