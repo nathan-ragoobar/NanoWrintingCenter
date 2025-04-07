@@ -62,7 +62,7 @@ add_definitions(-DEIGEN_USE_THREADS)
 ###################################################################
 
 # Find Qt components
-#find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 #find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 
