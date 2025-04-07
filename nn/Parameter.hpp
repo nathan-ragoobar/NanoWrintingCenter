@@ -5,7 +5,7 @@
 #ifdef _WIN32
   #include <io.h>
 #else
-  #include <unistd.h> //Can't see any functions that need the unistd.h file. But still leaving it here.
+  //#include <unistd.h> //Can't see any functions that need the unistd.h file. But still leaving it here.
 #endif
 
 #include <iomanip>
