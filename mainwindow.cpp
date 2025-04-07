@@ -63,34 +63,43 @@ void MainWindow::createHeader()
     QHBoxLayout* headerLayout = new QHBoxLayout(headerWidget);
     headerLayout->setContentsMargins(20, 0, 20, 0);
     
-    logoWidget = new QLabel();
+    // Container for logo and name
+    QWidget* brandContainer = new QWidget();
+    QHBoxLayout* brandLayout = new QHBoxLayout(brandContainer);
+    brandLayout->setContentsMargins(0, 0, 0, 0);
+    brandLayout->setSpacing(10); // Space between logo and text
     
-    // Debug available resources
-    qDebug() << "Available resource paths:";
-    QDirIterator it(":", QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        qDebug() << it.next();
-    }
+    // Logo widget
+    logoWidget = new QLabel();
+    logoWidget->setObjectName("logoWidget");
+    
+    // Name widget
+    QLabel* nameWidget = new QLabel("NanoWritingCentre");
+    nameWidget->setObjectName("nameWidget");
+    nameWidget->setStyleSheet("color: #E5E7EB; font-size: 22px; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;");
     
     // Load the PNG image from resources
-    QString logoPath = ":/images/cstar-logo.png";
+    QString logoPath = ":/images/NanoLogo.png";
     qDebug() << "Attempting to load logo from:" << logoPath;
     QPixmap logo(logoPath);
     
     if (logo.isNull()) {
         qDebug() << "Failed to load logo from resources";
-        logoWidget->setText("CSTAR");  // Fallback text
+        logoWidget->setText(""); // Empty, since we already have a text label
     } else {
         qDebug() << "Logo loaded successfully, dimensions:" << logo.width() << "x" << logo.height();
-        logo = logo.scaledToHeight(50, Qt::SmoothTransformation);
+        logo = logo.scaledToHeight(40, Qt::SmoothTransformation);
         logoWidget->setPixmap(logo);
     }
     
-    // Center the logo vertically in the header
-    headerLayout->addWidget(logoWidget, 0, Qt::AlignVCenter);
+    // Add logo and name to brand container
+    brandLayout->addWidget(logoWidget, 0, Qt::AlignVCenter);
+    brandLayout->addWidget(nameWidget, 0, Qt::AlignVCenter);
     
-    // Add a stretching spacer to push the logo to the left
-    headerLayout->addStretch(1);
+    // Add brand container to header layout
+    headerLayout->addWidget(brandContainer, 0, Qt::AlignVCenter);
+    
+    // Add a stretching spacer to push everything 
 }
 
 void MainWindow::createSidebar()
