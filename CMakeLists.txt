@@ -62,9 +62,9 @@ add_definitions(-DEIGEN_USE_THREADS)
 ###################################################################
 
 # Find Qt components
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Concurrent)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent)
+#find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Concurrent)
+#find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 
 # Qt project sources
 set(PROJECT_SOURCES
@@ -96,10 +96,10 @@ endif()
 
 # Link against Qt components
 target_link_libraries(NanoWritingCentre PRIVATE
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    Qt6::Concurrent
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Concurrent
     Threads::Threads
 )
 
