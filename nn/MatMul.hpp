@@ -27,6 +27,57 @@ struct MatMul {
         Eigen::IndexPair<int>(1, 0)};
     y.device(g_device) = x1.contract(x2, product_dims) * scale;
   }
+  
+  // Added function for LoRALinear - matrix multiplication with scaling and addition
+  static void MatMulWithScale(typename TTypes<T>::ConstMatrix x1,
+                            typename TTypes<T>::ConstMatrix x2,
+                            typename TTypes<T>::Matrix y, 
+                            T scale_mul = 1.0f, T scale_add = 1.0f) {
+    // x: [M, N], x2: [N, K], y: [M, K]
+    CHECK_EQ(x1.dimension(0), y.dimension(0));
+    CHECK_EQ(x1.dimension(1), x2.dimension(0));
+    CHECK_EQ(x2.dimension(1), y.dimension(1));
+
+    // y = y * scale_add + (x1 * x2) * scale_mul
+    Eigen::array<Eigen::IndexPair<int>, 1> product_dims = {
+        Eigen::IndexPair<int>(1, 0)};
+    y.device(g_device) = y * scale_add + 
+                        (x1.contract(x2, product_dims) * scale_mul);
+  }
+
+  // Added function for LoRALinear - matrix multiplication with transpose of A
+  static void MatMulTransposeA(typename TTypes<T>::ConstMatrix x1,
+                             typename TTypes<T>::ConstMatrix x2,
+                             typename TTypes<T>::Matrix y,
+                             T scale_mul = 1.0f, T scale_add = 0.0f) {
+    // x1: [M, K], x2: [N, K], y: [M, N] 
+    // Computes: y = y * scale_add + (x1^T * x2) * scale_mul
+    CHECK_EQ(x1.dimension(0), y.dimension(0));
+    CHECK_EQ(x2.dimension(0), y.dimension(1));
+    CHECK_EQ(x1.dimension(1), x2.dimension(1));
+
+    Eigen::array<Eigen::IndexPair<int>, 1> product_dims = {
+        Eigen::IndexPair<int>(1, 1)};
+    y.device(g_device) = y * scale_add + 
+                        (x1.contract(x2, product_dims) * scale_mul);
+  }
+
+  // Added function for LoRALinear - matrix multiplication with transpose of B
+  static void MatMulTransposeB(typename TTypes<T>::ConstMatrix x1,
+                             typename TTypes<T>::ConstMatrix x2,
+                             typename TTypes<T>::Matrix y,
+                             T scale_mul = 1.0f, T scale_add = 0.0f) {
+    // x1: [M, N], x2: [K, N], y: [M, K]
+    // Computes: y = y * scale_add + (x1 * x2^T) * scale_mul
+    CHECK_EQ(x1.dimension(0), y.dimension(0));
+    CHECK_EQ(x2.dimension(0), y.dimension(1)); 
+    CHECK_EQ(x1.dimension(1), x2.dimension(1));
+
+    Eigen::array<Eigen::IndexPair<int>, 1> product_dims = {
+        Eigen::IndexPair<int>(1, 1)};
+    y.device(g_device) = y * scale_add + 
+                        (x1.contract(x2, product_dims) * scale_mul);
+  }
 
   static void Backward(typename TTypes<T>::ConstMatrix x1,
                        typename TTypes<T>::ConstMatrix x2,
@@ -62,6 +113,9 @@ struct MatMul {
   }
 };
 
+// Don't define NormalFill and RandomNormalFill here, they're already defined in Parameter.hpp
+// We'll just need to make sure LoRALinear.hpp includes Parameter.hpp
+
 }  // namespace nn
 
-#endif  // LLM_CPP__NN_HPP_
+#endif  // LLM_CPP__MATMUL_HPP_

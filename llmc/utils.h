@@ -6,24 +6,12 @@
 */
 #ifndef UTILS_H
 #define UTILS_H
-/*
-#ifdef _WIN32
-    #include <winsock2.h>
-    #include <direct.h>
-    #define mkdir(path, mode) _mkdir(path)
-#else
-    #include <unistd.h>
-    #include <dirent.h>
-    #include <arpa/inet.h>
-#endif
-*/
 
 #ifdef _WIN32
 #include "./unistd.h"  // Include Windows implementation
 #else
 #include <unistd.h>     // Include POSIX implementation
 #endif
-
 
 #include <string.h>
 #include <stdio.h>
@@ -206,23 +194,6 @@ extern inline void create_dir_if_not_exists(const char *dir) {
     }
 }
 
-/*
-extern inline void create_dir_if_not_exists(const char *dir) {
-    if (dir == NULL) { return; }
-    struct stat st = {0};
-    if (stat(dir, &st) == -1) {
-#ifdef _WIN32
-        if (mkdir(dir) == -1) {
-#else
-        if (mkdir(dir, 0700) == -1) {
-#endif
-            printf("ERROR: could not create directory: %s\n", dir);
-            exit(EXIT_FAILURE);
-        }
-        printf("created directory: %s\n", dir);
-    }
-}
-*/
 extern inline int find_max_step(const char* output_log_dir) {
     // find the DONE file in the log dir with highest step count
     if (output_log_dir == NULL) { return -1; }

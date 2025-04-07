@@ -82,6 +82,7 @@ Both output:
 
 #ifndef RAND_H
 #define RAND_H
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 

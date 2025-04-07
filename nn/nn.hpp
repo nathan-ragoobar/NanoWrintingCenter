@@ -5,4 +5,3 @@
 #include "Embedding.hpp"
 #include "Linear.hpp"
 #include "MatMul.hpp"
-#include "gpt.hpp"

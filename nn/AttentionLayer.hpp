@@ -57,7 +57,7 @@ struct CausalSelfAttention {
     const int B = x.dimension(0);  // batch size
     const int T = x.dimension(1);  // sequence length
     const int C = x.dimension(2);  // embedding dimensionality (n_embd)
-    //LOG_FIRST_N(INFO, 1) << "B: " << B << ", T: " << T << ", C: " << C;
+    LOG_FIRST_N(INFO, 1) << "B: " << B << ", T: " << T << ", C: " << C;
     int NH = n_head_, HS = C / n_head_;
     CHECK_EQ(B, y.dimension(0));
     CHECK_EQ(T, y.dimension(1));

@@ -51,7 +51,7 @@ struct AdamW {
     }
   }
 
-  void Step(int t) {
+  void Step(int t,float lr) {
     for (size_t i = 0; i < parameters_.size(); ++i) {
       auto parameter = parameters_[i]->flat<float>();
       auto grad = parameters_[i]->flat_grad<float>();
@@ -68,7 +68,8 @@ struct AdamW {
 
       // update
       parameter.device(nn::g_device) -=
-          lr_ * (m_hat / (v_hat.sqrt() + eps_) + weight_decay_ * parameter);
+          lr * (m_hat / (v_hat.sqrt() + eps_) + weight_decay_ * parameter);
+          //printf("lr: %f\n",lr);
     }
   }
 

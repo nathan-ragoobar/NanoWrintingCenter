@@ -1,7 +1,8 @@
 #ifndef LLM_CPP__NN_HPP_
 #define LLM_CPP__NN_HPP_
+
 #define _USE_MATH_DEFINES
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h> //Can't see any functions that need the unistd.h file. But still leaving it here.
@@ -14,6 +15,7 @@
 
 #include "llmc/rand.h"
 #include "tensor/tensor_util.hpp"
+#include <eigen/unsupported/Eigen/CXX11/Tensor>
 
 
 /* #include "absl/algorithm/container.h"

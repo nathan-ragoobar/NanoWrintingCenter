@@ -1,9 +1,9 @@
 #ifndef LLM_CPP_LLMCPP_TENSOR_UTIL_HPP_
 #define LLM_CPP_LLMCPP_TENSOR_UTIL_HPP_
 
-#include "absl/container/inlined_vector.h"
+#include "./../abseil-cpp/absl/container/inlined_vector.h"
 #include "tensor_types.hpp"
-#include "eigen/Eigen/Core"
+#include "./../eigen/Eigen/Core"
 
 using floatX = float;
 

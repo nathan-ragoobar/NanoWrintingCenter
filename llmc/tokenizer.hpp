@@ -140,7 +140,52 @@ namespace nano {
         
             // Tokenize input text into token IDs
             std::vector<int> encode(const std::string& text) {
-                // Modified regex to treat consecutive special characters as a single token
+                // First, check for special tokens that should be preserved whole
+                static const std::vector<std::string> special_tokens = {
+                    "<|endoftext|>", "<|startoftext|>", "<|padding|>" 
+                };
+                
+                std::vector<int> tokenIDs;
+                std::string remaining_text = text;
+                
+                // Try to find and process special tokens first
+                for (const auto& special : special_tokens) {
+                    size_t pos = 0;
+                    while ((pos = remaining_text.find(special, pos)) != std::string::npos) {
+                        // Process text before the special token
+                        if (pos > 0) {
+                            std::string before = remaining_text.substr(0, pos);
+                            auto before_tokens = encode_regular(before);
+                            tokenIDs.insert(tokenIDs.end(), before_tokens.begin(), before_tokens.end());
+                        }
+                        
+                        // Add the special token directly
+                        auto it = encoder.find(special);
+                        if (it != encoder.end()) {
+                            tokenIDs.push_back(it->second);
+                        } else {
+                            std::cerr << "Warning: Special token not found in encoder: " << special << std::endl;
+                        }
+                        
+                        // Update the remaining text
+                        pos += special.length();
+                        remaining_text = remaining_text.substr(pos);
+                        pos = 0;
+                    }
+                }
+                
+                // Process any remaining text using the regular tokenization
+                if (!remaining_text.empty()) {
+                    auto remaining_tokens = encode_regular(remaining_text);
+                    tokenIDs.insert(tokenIDs.end(), remaining_tokens.begin(), remaining_tokens.end());
+                }
+                
+                return tokenIDs;
+            }
+            
+            // Helper method for the regular tokenization process
+            std::vector<int> encode_regular(const std::string& text) {
+                // Original regex tokenization logic
                 std::regex wordRegex(R"('s|'t|'re|'ve|'m|'ll|'d| ?[[:alpha:]]+| ?[[:digit:]]+|[#]+|[^\s[:alpha:][:digit:]]+|\s+)");
                 std::sregex_iterator iter(text.begin(), text.end(), wordRegex);
                 std::sregex_iterator end;
@@ -149,7 +194,7 @@ namespace nano {
                 while (iter != end) {
                     std::string word = iter->str();
                     
-                    // Check if this is a special sequence like "###" that should be treated as a single token
+                    // Check if this is a special sequence that should be treated as a single token
                     auto directIt = encoder.find(word);
                     if (directIt != encoder.end()) {
                         // If the entire sequence is a token, use it directly

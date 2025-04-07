@@ -14,12 +14,15 @@ struct GPT2Config {
   int channels;           // number of channels, e.g. 768
 };
 
+//Eventually I would like to move all the functions from here into a more general location. 
+//I want to be able to apply these functions to any model, not just GPT-2. -NR
+
 struct GPT2 {
   using Type = floatX;
 
   bool BuildFromCheckpoint(absl::string_view checkpoint_path) {
     // read in model from a checkpoint file
-    FILE* model_file = fopenCheck(checkpoint_path.data(), "rb");
+    FILE* model_file = fopenCheck(checkpoint_path.data(), "rb"); //"rb" opens the binary file in read mode only. To open in read and write you need to do "rb+"
     if (model_file == nullptr) {
       printf("Error opening model file\n");
       exit(1);
@@ -45,7 +48,6 @@ struct GPT2 {
     config.num_heads = NH = model_header[5];
     config.channels = C = model_header[6];
     config.padded_vocab_size = Vp = model_header[7];
-    /*
     printf("[GPT-2]\n");
     printf("max_seq_len: %zu\n", maxT);
     printf("vocab_size: %zu\n", V);
@@ -53,14 +55,14 @@ struct GPT2 {
     printf("num_layers: %zu\n", L);
     printf("num_heads: %zu\n", NH);
     printf("channels: %zu\n", C);
-*/
+
     gpt2_ = std::make_unique<gpt::GPT>(
         config.max_seq_len, config.vocab_size, config.padded_vocab_size,
         config.num_layers, config.num_heads, config.channels);
     // allocate space for all the parameters and read them in
     size_t num_parameters = gpt2_->NumParameters();
-    //printf("num_parameters: %zu(%zu MB)\n", num_parameters,
-      //     num_parameters * sizeof(floatX) / 1024 / 1024);
+    printf("num_parameters: %zu(%zu MB)\n", num_parameters,
+           num_parameters * sizeof(Type) / 1024 / 1024);
 
     auto restore_fn = [&](nn::Parameter* p, const std::string& name) {
 #ifdef EIGEN_USE_GPU
@@ -72,10 +74,100 @@ struct GPT2 {
       freadCheck(p->data<Type>(), sizeof(Type), p->size(), model_file);
 #endif
     };
+
+    
     ApplyFn(restore_fn, L);
     fcloseCheck(model_file);
 
     return true;
+  } //end BuildFromCheckpoint()
+
+void InitializeFromScratch(const GPT2Config& config) {
+    // Create GPT model with config params
+    gpt2_ = std::make_unique<gpt::GPT>(
+        config.max_seq_len,
+        config.vocab_size, 
+        config.padded_vocab_size,
+        config.num_layers,
+        config.num_heads,
+        config.channels
+    );
+
+    // Initialize weights using Kaiming initialization
+    auto init_fn = [&](nn::Parameter* p, const std::string& name) {
+      auto data = p->flat<Type>();
+      int fan_in = p->size() / data.dimension(0);
+      float std_dev = 1.0f / std::sqrt(static_cast<float>(fan_in));
+      
+      // Random initialization
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      std::normal_distribution<float> d(0.0f, std_dev);
+
+      std::vector<Type> cpu_data(p->size());
+      for(int i = 0; i < p->size(); i++) {
+        cpu_data[i] = Type(d(gen));
+      }
+
+#ifdef EIGEN_USE_GPU
+      nn::g_device.memcpyHostToDevice(p->data<Type>(), cpu_data.data(), sizeof(Type) * p->size());
+#else
+      std::copy(cpu_data.begin(), cpu_data.end(), data.data());
+#endif
+    };
+
+    // Apply initialization to all parameters
+    ApplyFn(init_fn, config.num_layers);
+
+    // Store config
+    this->config = config;
+  } //end InitializeFromScratch()
+
+
+  //SAVE MODEL
+  void SaveModel(absl::string_view model_path) {
+    //Opens model file for writing
+    FILE* model_file = fopenCheck(model_path.data(), "wb"); //"wb" opens the binary file for writing. If the file already exists, the file is overwritten. If the file does not exist, it is created.
+    if (model_file == nullptr) {
+      printf("Error opening model file\n");
+      exit(1);
+    }
+
+    int model_header[256];
+    // Save hyperparameters to header
+    int maxT, V, Vp, L, NH, C;
+
+
+    maxT = model_header[2] = gpt2_->block_size_;
+    V = model_header[3] = gpt2_->vocab_size_;
+    L = model_header[4] = gpt2_->n_layer_;
+    NH = model_header[5] = gpt2_->n_head_;
+    C = model_header[6] = gpt2_->n_embed_;
+    Vp = model_header[7] = gpt2_->padded_vocab_size_;
+
+    model_header[0] = 20240326; //Magic number. Basically a unique number that is used to identify the file type. It is used to differentiate between different file formats or to identify the file type.
+    //Also this magic number was something zhangpiu had created. Idk if I want to keep it or not -NR
+
+    model_header[1] = 3;
+
+    fwriteCheck(model_header, sizeof(int), 256, model_file);
+    
+
+
+    // Define the save function
+    auto save_fn = [&](nn::Parameter* p, const std::string& name) {
+#ifdef EIGEN_USE_GPU
+  std::vector<Type> cpu_data(p->size());
+  nn::g_device.memcpyDeviceToHost(cpu_data.data(), p->data<Type>(), sizeof(Type) * p->size());
+  fwriteCheck(cpu_data.data(), sizeof(Type), p->size(), model_file);
+#else
+  fwriteCheck(p->data<Type>(), sizeof(Type), p->size(), model_file);
+#endif
+    };
+
+    // Apply the save function to the model parameters
+    ApplyFn(save_fn, L);
+    fcloseCheck(model_file);
   }
 
   void Parameters(std::vector<nn::Parameter*>* parameters) const {
@@ -96,6 +188,8 @@ struct GPT2 {
   void ApplyFn(
       const std::function<void(nn::Parameter*, const std::string&)>& apply_fn,
       int L) const {
+
+
     apply_fn(gpt2_->wte_->weight_.get(), "wte");
     apply_fn(gpt2_->wpe_->weight_.get(), "wpe");
 
@@ -191,8 +285,6 @@ struct GPT2 {
     apply_fn(gpt2_->lnf_->weight_.get(), "lnfw");
     // lnfb
     apply_fn(gpt2_->lnf_->bias_.get(), "lnfb");
-
-    
   }
 
   GPT2Config config;
